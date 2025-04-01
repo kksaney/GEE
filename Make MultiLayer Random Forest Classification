@@ -1,0 +1,753 @@
+// Import Boundary data (table) and sample point data (table2)
+var table = ee.FeatureCollection("users/gismania1/Floodplain_Boundary_250310"),
+var table2 = ee.FeatureCollection("users/gismania1/CoverType_250321");
+
+
+// Convert the FeatureCollection to a geometry (dissolving all features into one geometry)
+var geometry = table.geometry();
+
+// Print the geometry to the console
+print("Boundary:", geometry);
+
+
+// Display the geometry on the map
+Map.centerObject(table2, 10); // Adjust zoom level as needed
+Map.addLayer(geometry, {color: 'red'}, "Boundary");
+Map.addLayer(table2, {color: 'blue'}, "Sample Points");
+
+var region = table;
+print(table2);
+
+// Import Cloud Score+ S2_HARMONIZED Sentinel 
+var csPlus = ee.ImageCollection('GOOGLE/CLOUD_SCORE_PLUS/V1/S2_HARMONIZED');
+var QA_BAND = 'cs_cdf';
+//Filter clear image, set threshold 0.75
+var CLEAR_THRESHOLD = 0.75;
+
+var sent_21_spring = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED').filterDate('2021-05-01', '2021-06-10').filterBounds(geometry).linkCollection(csPlus, [QA_BAND])
+    .map(function(img) {
+      return img.updateMask(img.select(QA_BAND).gte(CLEAR_THRESHOLD));
+    });
+var sent_22_spring = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED').filterDate('2022-05-01', '2022-06-10').filterBounds(geometry).linkCollection(csPlus, [QA_BAND])
+    .map(function(img) {
+      return img.updateMask(img.select(QA_BAND).gte(CLEAR_THRESHOLD));
+    });
+var sent_23_spring = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED').filterDate('2023-05-01', '2023-06-10').filterBounds(geometry).linkCollection(csPlus, [QA_BAND])
+    .map(function(img) {
+      return img.updateMask(img.select(QA_BAND).gte(CLEAR_THRESHOLD));
+    });
+
+// Make composite.
+var sent_spring = sent_21_spring.merge(sent_22_spring).merge(sent_23_spring).median();
+
+
+//Map.addLayer(sent_spring, {bands: ['B4', 'B3', 'B2'], max: 2500});
+var sent_21_sum = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED').filterDate('2021-07-01', '2021-08-21').filterBounds(geometry).linkCollection(csPlus, [QA_BAND])
+    .map(function(img) {
+      return img.updateMask(img.select(QA_BAND).gte(CLEAR_THRESHOLD));
+    });
+var sent_22_sum = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED').filterDate('2022-07-01', '2022-08-21').filterBounds(geometry).linkCollection(csPlus, [QA_BAND])
+    .map(function(img) {
+      return img.updateMask(img.select(QA_BAND).gte(CLEAR_THRESHOLD));
+    });
+var sent_23_sum = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED').filterDate('2023-07-01', '2023-08-21').filterBounds(geometry).linkCollection(csPlus, [QA_BAND])
+    .map(function(img) {
+      return img.updateMask(img.select(QA_BAND).gte(CLEAR_THRESHOLD));
+    });
+
+// Make composite.
+var sent_sum = sent_21_sum.merge(sent_22_sum).merge(sent_23_sum).median();
+
+
+//Map.addLayer(sent_sum, {bands: ['B4', 'B3', 'B2'], max: 2500});
+var sent_21_fall = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED').filterDate('2021-09-24', '2021-10-24').filterBounds(geometry).linkCollection(csPlus, [QA_BAND])
+    .map(function(img) {
+      return img.updateMask(img.select(QA_BAND).gte(CLEAR_THRESHOLD));
+    });
+var sent_22_fall = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED').filterDate('2022-09-24', '2022-10-24').filterBounds(geometry).linkCollection(csPlus, [QA_BAND])
+    .map(function(img) {
+      return img.updateMask(img.select(QA_BAND).gte(CLEAR_THRESHOLD));
+    });
+var sent_23_fall = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED').filterDate('2023-09-24', '2023-10-24').filterBounds(geometry).linkCollection(csPlus, [QA_BAND])
+    .map(function(img) {
+      return img.updateMask(img.select(QA_BAND).gte(CLEAR_THRESHOLD));
+    });
+
+// Make composite.
+var sent_fall = sent_21_fall.merge(sent_22_fall).merge(sent_23_fall).median();
+
+//Map.addLayer(sent_fall, {bands: ['B4', 'B3', 'B2'], max: 2500});
+
+var sent_21_winter = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED').filterDate('2021-01-01', '2021-03-01').filterBounds(geometry).linkCollection(csPlus, [QA_BAND])
+    .map(function(img) {
+      return img.updateMask(img.select(QA_BAND).gte(CLEAR_THRESHOLD));
+    });
+var sent_22_winter = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED').filterDate('2022-01-01', '2022-03-01').filterBounds(geometry).linkCollection(csPlus, [QA_BAND])
+    .map(function(img) {
+      return img.updateMask(img.select(QA_BAND).gte(CLEAR_THRESHOLD));
+    });
+var sent_23_winter = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED').filterDate('2023-01-01', '2023-03-01').filterBounds(geometry).linkCollection(csPlus, [QA_BAND])
+    .map(function(img) {
+      return img.updateMask(img.select(QA_BAND).gte(CLEAR_THRESHOLD));
+    });
+
+// Make composite.
+var sent_winter = sent_21_winter.merge(sent_22_winter).merge(sent_23_winter).median();
+
+
+
+//Map.addLayer(sent_winter, {bands: ['B4', 'B3', 'B2'], max: 2500});
+
+
+//Map.centerObject(region, 12);
+
+// function maskClouds(img) {
+//   var clouds = ee.Image(img.get('cloud_mask')).select('probability');
+//   var isNotCloud = clouds.lt(MAX_CLOUD_PROBABILITY);
+//   return img.updateMask(isNotCloud);
+// }
+
+// function maskEdges(s2_img) {
+//   return s2_img.updateMask(
+//       s2_img.select('B8A').mask().updateMask(s2_img.select('B9').mask()));
+// }
+
+
+// var maskL8 = function(image) {
+//   var qa = image.select('QA_PIXEL');
+//   /// Check that the cloud bit is off.
+//   // See https://www.usgs.gov/media/files/landsat-8-9-olitirs-collection-2-level-1-data-format-control-book
+//   var mask = qa.bitwiseAnd(1 << 3).eq(0);
+//   return image.updateMask(mask);
+// };
+
+function maskL8srClouds(image) {
+  // Bits 3 and 5 are cloud shadow and cloud, respectively.
+  var dilatedclouds =(1<<1)
+  var cloudShadowBitMask = (1<<3)
+  var cloudsBitMask = (1<<4)
+  // Get the pixel QA band.
+  var qa = image.select('QA_PIXEL');
+  // Both flags should be set to zero, indicating clear conditions.
+  var mask = qa.bitwiseAnd(cloudShadowBitMask).eq(0)
+                .and(qa.bitwiseAnd(dilatedclouds).eq(0))
+                .and(qa.bitwiseAnd(cloudsBitMask).eq(0));
+  return image.updateMask(mask);
+}
+
+// Map the function over one year of Landsat 8 TOA data and take the median
+var L8_21_spring = ee.ImageCollection('LANDSAT/LC08/C02/T1_TOA').filterDate('2021-05-01', '2021-06-10').filterBounds(geometry).filterMetadata('CLOUD_COVER','less_than',10);
+var L8_22_spring = ee.ImageCollection('LANDSAT/LC08/C02/T1_TOA').filterDate('2022-05-01', '2022-06-10').filterBounds(geometry).filterMetadata('CLOUD_COVER','less_than',10);
+var L9_22_spring = ee.ImageCollection('LANDSAT/LC09/C02/T1_TOA').filterDate('2022-05-01', '2022-06-10').filterBounds(geometry).filterMetadata('CLOUD_COVER','less_than',10);
+var L8_23_spring = ee.ImageCollection('LANDSAT/LC08/C02/T1_TOA').filterDate('2023-05-01', '2023-06-10').filterBounds(geometry).filterMetadata('CLOUD_COVER','less_than',10);
+var L9_23_spring = ee.ImageCollection('LANDSAT/LC09/C02/T1_TOA').filterDate('2023-05-01', '2023-06-10').filterBounds(geometry).filterMetadata('CLOUD_COVER','less_than',10);
+
+var composite_1 =L8_21_spring.merge(L8_22_spring).merge(L9_22_spring).merge(L8_23_spring).merge(L9_23_spring)
+    //.map(maskL8)
+    .map(maskL8srClouds)
+    .median();
+
+// Display the results in a cloudy place.
+//Map.setCenter(-94.641, 47.149, 12);
+//Map.addLayer(composite_1, {bands: ['B4', 'B3', 'B2'], max: 0.3});
+
+
+// var L8_21_summer = ee.ImageCollection('LANDSAT/LC08/C02/T1_TOA').filterDate('2021-07-01', '2021-08-21').filterBounds(geometry).filterMetadata('CLOUD_COVER','less_than',50);
+// var L8_22_summer = ee.ImageCollection('LANDSAT/LC08/C02/T1_TOA').filterDate('2022-07-01', '2022-08-21').filterBounds(geometry).filterMetadata('CLOUD_COVER','less_than',50);
+// var L9_22_summer = ee.ImageCollection('LANDSAT/LC09/C02/T1_TOA').filterDate('2022-07-01', '2022-08-21').filterBounds(geometry).filterMetadata('CLOUD_COVER','less_than',50);
+// var L8_23_summer = ee.ImageCollection('LANDSAT/LC08/C02/T1_TOA').filterDate('2023-07-01', '2023-08-21').filterBounds(geometry).filterMetadata('CLOUD_COVER','less_than',50);
+// var L9_23_summer = ee.ImageCollection('LANDSAT/LC09/C02/T1_TOA').filterDate('2023-07-01', '2023-08-21').filterBounds(geometry).filterMetadata('CLOUD_COVER','less_than',50);
+
+// print(L8_21_summer)
+// print(L8_22_summer)
+// print(L8_23_summer)
+// print(L9_22_summer)
+// print(L9_23_summer)
+
+var sent104= ee.Image("LANDSAT/LC08/C02/T1_TOA/LC08_028029_20210812");
+var sent106= ee.Image("LANDSAT/LC08/C02/T1_TOA/LC08_028029_20220730");
+var sent110= ee.Image("LANDSAT/LC08/C02/T1_TOA/LC08_028030_20210727");
+var sent111= ee.Image("LANDSAT/LC08/C02/T1_TOA/LC08_028030_20210812");
+var sent12= ee.Image("LANDSAT/LC08/C02/T1_TOA/LC08_025029_20220709");
+var sent125= ee.Image("LANDSAT/LC08/C02/T1_TOA/LC08_029026_20210718");
+var sent128= ee.Image("LANDSAT/LC08/C02/T1_TOA/LC08_029026_20220721");
+var sent131= ee.Image("LANDSAT/LC08/C02/T1_TOA/LC08_029027_20210702");
+var sent135= ee.Image("LANDSAT/LC08/C02/T1_TOA/LC08_029027_20220721");
+var sent14= ee.Image("LANDSAT/LC08/C02/T1_TOA/LC08_025029_20220810");
+var sent140= ee.Image("LANDSAT/LC08/C02/T1_TOA/LC08_029028_20210702");
+var sent144= ee.Image("LANDSAT/LC08/C02/T1_TOA/LC08_029028_20220721");
+var sent145= ee.Image("LANDSAT/LC08/C02/T1_TOA/LC08_029028_20230708");
+var sent146= ee.Image("LANDSAT/LC08/C02/T1_TOA/LC08_029028_20230724");
+var sent148= ee.Image("LANDSAT/LC08/C02/T1_TOA/LC08_029029_20210702");
+var sent152= ee.Image("LANDSAT/LC08/C02/T1_TOA/LC08_029029_20220721");
+var sent153= ee.Image("LANDSAT/LC08/C02/T1_TOA/LC08_029029_20230708");
+var sent154= ee.Image("LANDSAT/LC08/C02/T1_TOA/LC08_029029_20230724");
+var sent161= ee.Image("LANDSAT/LC08/C02/T1_TOA/LC08_029030_20220721");
+var sent162= ee.Image("LANDSAT/LC08/C02/T1_TOA/LC08_029030_20230708");
+var sent166= ee.Image("LANDSAT/LC08/C02/T1_TOA/LC08_030025_20210725");
+var sent169= ee.Image("LANDSAT/LC08/C02/T1_TOA/LC08_030026_20210709");
+var sent17= ee.Image("LANDSAT/LC08/C02/T1_TOA/LC08_025030_20220709");
+var sent170= ee.Image("LANDSAT/LC08/C02/T1_TOA/LC08_030026_20210725");
+var sent176= ee.Image("LANDSAT/LC08/C02/T1_TOA/LC08_030027_20210725");
+var sent177= ee.Image("LANDSAT/LC08/C02/T1_TOA/LC08_030027_20210810");
+var sent180= ee.Image("LANDSAT/LC08/C02/T1_TOA/LC08_030028_20210725");
+var sent181= ee.Image("LANDSAT/LC08/C02/T1_TOA/LC08_030028_20210810");
+var sent19= ee.Image("LANDSAT/LC08/C02/T1_TOA/LC08_025030_20220810");
+var sent204= ee.Image("LANDSAT/LC08/C02/T1_TOA/LC08_031026_20220804");
+var sent222= ee.Image("LANDSAT/LC09/C02/T1_TOA/LC09_025027_20220717");
+var sent223= ee.Image("LANDSAT/LC09/C02/T1_TOA/LC09_025027_20220802");
+var sent238= ee.Image("LANDSAT/LC09/C02/T1_TOA/LC09_026026_20220809");
+var sent241= ee.Image("LANDSAT/LC09/C02/T1_TOA/LC09_026027_20220809");
+var sent245= ee.Image("LANDSAT/LC09/C02/T1_TOA/LC09_026028_20220809");
+var sent249= ee.Image("LANDSAT/LC09/C02/T1_TOA/LC09_026029_20220809");
+var sent256= ee.Image("LANDSAT/LC09/C02/T1_TOA/LC09_026030_20230812");
+var sent257= ee.Image("LANDSAT/LC09/C02/T1_TOA/LC09_027026_20220715");
+var sent261= ee.Image("LANDSAT/LC09/C02/T1_TOA/LC09_027027_20220715");
+var sent264= ee.Image("LANDSAT/LC09/C02/T1_TOA/LC09_027027_20230819");
+var sent268= ee.Image("LANDSAT/LC09/C02/T1_TOA/LC09_027028_20230803");
+var sent269= ee.Image("LANDSAT/LC09/C02/T1_TOA/LC09_027028_20230819");
+var sent27= ee.Image("LANDSAT/LC08/C02/T1_TOA/LC08_026027_20210814");
+var sent286= ee.Image("LANDSAT/LC09/C02/T1_TOA/LC09_028028_20220722");
+var sent289= ee.Image("LANDSAT/LC09/C02/T1_TOA/LC09_028029_20220722");
+var sent29= ee.Image("LANDSAT/LC08/C02/T1_TOA/LC08_026027_20230703");
+var sent290= ee.Image("LANDSAT/LC09/C02/T1_TOA/LC09_028029_20230709");
+var sent292= ee.Image("LANDSAT/LC09/C02/T1_TOA/LC09_028030_20220722");
+var sent293= ee.Image("LANDSAT/LC09/C02/T1_TOA/LC09_028030_20230709");
+var sent308= ee.Image("LANDSAT/LC09/C02/T1_TOA/LC09_029028_20220713");
+var sent314= ee.Image("LANDSAT/LC09/C02/T1_TOA/LC09_029029_20220713");
+var sent318= ee.Image("LANDSAT/LC09/C02/T1_TOA/LC09_029030_20220713");
+var sent32= ee.Image("LANDSAT/LC08/C02/T1_TOA/LC08_026028_20210713");
+var sent322= ee.Image("LANDSAT/LC09/C02/T1_TOA/LC09_030025_20220720");
+var sent325= ee.Image("LANDSAT/LC09/C02/T1_TOA/LC09_030026_20220720");
+var sent328= ee.Image("LANDSAT/LC09/C02/T1_TOA/LC09_030027_20220720");
+var sent333= ee.Image("LANDSAT/LC09/C02/T1_TOA/LC09_030028_20220720");
+var sent334= ee.Image("LANDSAT/LC09/C02/T1_TOA/LC09_030028_20220805");
+var sent34= ee.Image("LANDSAT/LC08/C02/T1_TOA/LC08_026028_20210814");
+var sent35= ee.Image("LANDSAT/LC08/C02/T1_TOA/LC08_026028_20230703");
+var sent38= ee.Image("LANDSAT/LC08/C02/T1_TOA/LC08_026029_20210713");
+var sent39= ee.Image("LANDSAT/LC08/C02/T1_TOA/LC08_026029_20210814");
+var sent47= ee.Image("LANDSAT/LC08/C02/T1_TOA/LC08_026030_20210814");
+var sent56= ee.Image("LANDSAT/LC08/C02/T1_TOA/LC08_027026_20230726");
+var sent66= ee.Image("LANDSAT/LC08/C02/T1_TOA/LC08_027028_20230726");
+var sent62= ee.Image("LANDSAT/LC08/C02/T1_TOA/LC08_027028_20210704");
+var sent7= ee.Image("LANDSAT/LC08/C02/T1_TOA/LC08_025027_20220709");
+var sent71= ee.Image("LANDSAT/LC08/C02/T1_TOA/LC08_027029_20230710");
+var sent72= ee.Image("LANDSAT/LC08/C02/T1_TOA/LC08_027029_20230726");
+var sent73= ee.Image("LANDSAT/LC08/C02/T1_TOA/LC08_027029_20230811");
+var sent77= ee.Image("LANDSAT/LC08/C02/T1_TOA/LC08_027030_20230710");
+var sent78= ee.Image("LANDSAT/LC08/C02/T1_TOA/LC08_027030_20230726");
+var sent79= ee.Image("LANDSAT/LC08/C02/T1_TOA/LC08_027030_20230811");
+var sent83= ee.Image("LANDSAT/LC08/C02/T1_TOA/LC08_028026_20220730");
+var sent85= ee.Image("LANDSAT/LC08/C02/T1_TOA/LC08_028026_20230802");
+var sent89= ee.Image("LANDSAT/LC08/C02/T1_TOA/LC08_028027_20210812");
+var sent90= ee.Image("LANDSAT/LC08/C02/T1_TOA/LC08_028027_20220730");
+var sent96= ee.Image("LANDSAT/LC08/C02/T1_TOA/LC08_028028_20210812");
+
+var col = ee.ImageCollection.fromImages([ sent104,
+sent106,sent110,sent111,sent12,sent125,sent128,sent131,sent135,sent14,sent140,sent144,sent145,sent146,sent148,sent152,sent153,sent154,sent161,sent162,sent166,sent169,sent17,sent170,sent176,sent177,sent180,sent181,sent19,
+sent204,sent222,sent223,sent238,sent241,sent245,sent249,sent256,sent257,sent261,sent264,sent268,sent27,sent286,sent289,sent29,sent290,sent292,sent293,
+sent308,sent314,sent318,sent32,sent322,sent325,sent328,sent333,sent334,sent34,sent35,sent38,sent39,
+sent47,sent56,sent62,sent66,sent7,sent71,sent72,sent73,sent77,sent78,sent79,sent83,sent85,sent89,sent90,sent96]);
+
+var composite_2 = col
+    //.map(maskL8)
+    .map(maskL8srClouds)
+    .median();
+//Map.setCenter(-94.641, 47.149, 12);
+//Map.addLayer(composite_2, {bands: ['B4', 'B3', 'B2'], max: 0.3});
+
+var L8_21_fall = ee.ImageCollection('LANDSAT/LC08/C02/T1_TOA').filterDate('2021-09-24', '2021-10-24').filterBounds(geometry).filterMetadata('CLOUD_COVER','less_than',50);
+var L8_22_fall = ee.ImageCollection('LANDSAT/LC08/C02/T1_TOA').filterDate('2022-09-24', '2022-10-24').filterBounds(geometry).filterMetadata('CLOUD_COVER','less_than',50);
+var L9_22_fall = ee.ImageCollection('LANDSAT/LC09/C02/T1_TOA').filterDate('2022-09-24', '2022-10-24').filterBounds(geometry).filterMetadata('CLOUD_COVER','less_than',50);
+var L8_23_fall = ee.ImageCollection('LANDSAT/LC08/C02/T1_TOA').filterDate('2023-09-24', '2023-10-24').filterBounds(geometry).filterMetadata('CLOUD_COVER','less_than',50);
+var L9_23_fall = ee.ImageCollection('LANDSAT/LC09/C02/T1_TOA').filterDate('2023-09-24', '2023-10-24').filterBounds(geometry).filterMetadata('CLOUD_COVER','less_than',50);
+
+var composite_3 =L8_21_fall.merge(L8_22_fall).merge(L9_22_fall).merge(L8_23_fall).merge(L9_23_fall)
+   //.map(maskL8)
+    .map(maskL8srClouds)
+    .median();
+//Map.setCenter(-94.641, 47.149, 12);
+//Map.addLayer(composite_3, {bands: ['B4', 'B3', 'B2'], max: 0.3});
+
+var L8_21_winter = ee.ImageCollection('LANDSAT/LC08/C02/T1_TOA').filterDate('2021-01-01', '2021-03-01').filterBounds(geometry).filterMetadata('CLOUD_COVER','less_than',50);
+var L8_22_winter = ee.ImageCollection('LANDSAT/LC08/C02/T1_TOA').filterDate('2022-01-01', '2022-03-01').filterBounds(geometry).filterMetadata('CLOUD_COVER','less_than',50);
+var L9_22_winter = ee.ImageCollection('LANDSAT/LC09/C02/T1_TOA').filterDate('2022-01-01', '2022-03-01').filterBounds(geometry).filterMetadata('CLOUD_COVER','less_than',50);
+var L8_23_winter = ee.ImageCollection('LANDSAT/LC08/C02/T1_TOA').filterDate('2023-01-01', '2023-03-01').filterBounds(geometry).filterMetadata('CLOUD_COVER','less_than',50);
+var L9_23_winter = ee.ImageCollection('LANDSAT/LC09/C02/T1_TOA').filterDate('2023-01-01', '2023-03-01').filterBounds(geometry).filterMetadata('CLOUD_COVER','less_than',50);
+
+var composite_4 =L8_21_winter.merge(L8_22_winter).merge(L9_22_winter).merge(L8_23_winter).merge(L9_23_winter)
+    //.map(maskL8)
+    .map(maskL8srClouds)
+    .median();
+//Map.setCenter(-94.641, 47.149, 12);
+//Map.addLayer(composite_4, {bands: ['B4', 'B3', 'B2'], max: 0.3});
+
+var Spring = composite_1.select(['B1', 'B2','B3','B4','B5', 'B6', 'B7', 'B10', 'B11'],['B1','B2','B3','B4','B5', 'B6', 'B7', 'B10', 'B11'])
+
+var TCBSpringL = Spring.expression('0.3029 * B2 + 0.2786 * B3 + 0.4733 * B4 + 0.5599 * B5 + 0.508 * B6 + 0.1872 * B7', {
+  'B2' : Spring.select('B2'),
+  'B3' : Spring.select('B3'),
+  'B4' : Spring.select('B4'),
+  'B5' : Spring.select('B5'),
+  'B6' : Spring.select('B6'),
+  'B7' : Spring.select('B7')
+}).rename('TCBSpring').float();
+
+var TCGSpringL = Spring.expression('-0.2941 * B2 - 0.243 * B3 - 0.5424 * B4 + 0.7276 * B5 + 0.0713 * B6 - 0.1608 * B7', {
+  'B2' : Spring.select('B2'),
+  'B3' : Spring.select('B3'),
+  'B4' : Spring.select('B4'),
+  'B5' : Spring.select('B5'),
+  'B6' : Spring.select('B6'),
+  'B7' : Spring.select('B7')
+}).rename('TCGSpring').float();
+
+var TCWSpringL = Spring.expression('.1511 * B2 + .1973 * B3 + .3283 * B4 + .3407  * B5 -.7117 * B6 -.4559 * B7', {
+  'B2' : Spring.select('B2'),
+  'B3' : Spring.select('B3'),
+  'B4' : Spring.select('B4'),
+  'B5' : Spring.select('B5'),
+  'B6' : Spring.select('B6'),
+  'B7' : Spring.select('B7')
+}).rename('TCWSpring').float();
+
+var NDVISpringL = Spring.expression('(B5-B4)/(B5+B4)', {
+  'B4' : Spring.select('B4'),
+  'B5' : Spring.select('B5')
+}).rename('NDVISpring').float();
+
+var NDWISpringL = Spring.expression('(B5-B6)/(B5+B6)', {
+  'B5' : Spring.select('B5'),
+  'B6' : Spring.select('B6')
+}).rename('NDWISpring').float();
+
+var Summer = composite_1.select(['B1', 'B2','B3','B4','B5', 'B6', 'B7', 'B10', 'B11'],['B1','B2','B3','B4','B5', 'B6', 'B7', 'B10', 'B11'])
+
+var TCBSummerL = Summer.expression('0.3029 * B2 + 0.2786 * B3 + 0.4733 * B4 + 0.5599 * B5 + 0.508 * B6 + 0.1872 * B7', {
+  'B2' : Summer.select('B2'),
+  'B3' : Summer.select('B3'),
+  'B4' : Summer.select('B4'),
+  'B5' : Summer.select('B5'),
+  'B6' : Summer.select('B6'),
+  'B7' : Summer.select('B7')
+}).rename('TCBSummer').float();
+
+var TCGSummerL = Summer.expression('-0.2941 * B2 - 0.243 * B3 - 0.5424 * B4 + 0.7276 * B5 + 0.0713 * B6 - 0.1608 * B7', {
+  'B2' : Summer.select('B2'),
+  'B3' : Summer.select('B3'),
+  'B4' : Summer.select('B4'),
+  'B5' : Summer.select('B5'),
+  'B6' : Summer.select('B6'),
+  'B7' : Summer.select('B7')
+}).rename('TCGSummer').float();
+
+var TCWSummerL = Summer.expression('.1511 * B2 + .1973 * B3 + .3283 * B4 + .3407  * B5 -.7117 * B6 -.4559 * B7', {
+  'B2' : Summer.select('B2'),
+  'B3' : Summer.select('B3'),
+  'B4' : Summer.select('B4'),
+  'B5' : Summer.select('B5'),
+  'B6' : Summer.select('B6'),
+  'B7' : Summer.select('B7')
+}).rename('TCWSummer').float();
+
+var NDVISummerL = Summer.expression('(B5-B4)/(B5+B4)', {
+  'B4' : Summer.select('B4'),
+  'B5' : Summer.select('B5')
+}).rename('NDVISummer').float();
+
+var NDWISummerL = Summer.expression('(B5-B6)/(B5+B6)', {
+  'B5' : Summer.select('B5'),
+  'B6' : Summer.select('B6')
+}).rename('NDWISummer').float();
+
+var Fall = composite_3.select(['B1', 'B2','B3','B4','B5', 'B6', 'B7', 'B10', 'B11'],['B1','B2','B3','B4','B5', 'B6', 'B7', 'B10', 'B11'])
+
+var TCBFallL = Fall.expression('0.3029 * B2 + 0.2786 * B3 + 0.4733 * B4 + 0.5599 * B5 + 0.508 * B6 + 0.1872 * B7', {
+  'B2' : Fall.select('B2'),
+  'B3' : Fall.select('B3'),
+  'B4' : Fall.select('B4'),
+  'B5' : Fall.select('B5'),
+  'B6' : Fall.select('B6'),
+  'B7' : Fall.select('B7')
+}).rename('TCBFall').float();
+
+var TCGFallL = Fall.expression('-0.2941 * B2 - 0.243 * B3 - 0.5424 * B4 + 0.7276 * B5 + 0.0713 * B6 - 0.1608 * B7', {
+  'B2' : Fall.select('B2'),
+  'B3' : Fall.select('B3'),
+  'B4' : Fall.select('B4'),
+  'B5' : Fall.select('B5'),
+  'B6' : Fall.select('B6'),
+  'B7' : Fall.select('B7')
+}).rename('TCGFall').float();
+
+var TCWFallL = Fall.expression('.1511 * B2 + .1973 * B3 + .3283 * B4 + .3407  * B5 -.7117 * B6 -.4559 * B7', {
+  'B2' : Fall.select('B2'),
+  'B3' : Fall.select('B3'),
+  'B4' : Fall.select('B4'),
+  'B5' : Fall.select('B5'),
+  'B6' : Fall.select('B6'),
+  'B7' : Fall.select('B7')
+}).rename('TCWFall').float();
+
+var NDVIFallL = Fall.expression('(B5-B4)/(B5+B4)', {
+  'B4' : Fall.select('B4'),
+  'B5' : Fall.select('B5')
+}).rename('NDVIFall').float();
+
+var NDWIFallL = Fall.expression('(B5-B6)/(B5+B6)', {
+  'B5' : Fall.select('B5'),
+  'B6' : Fall.select('B6')
+}).rename('NDWIFall').float();
+
+var Winter = composite_4.select(['B1', 'B2','B3','B4','B5', 'B6', 'B7', 'B10', 'B11'],['B1','B2','B3','B4','B5', 'B6', 'B7', 'B10', 'B11'])
+
+var TCBWinterL = Winter.expression('0.3029 * B2 + 0.2786 * B3 + 0.4733 * B4 + 0.5599 * B5 + 0.508 * B6 + 0.1872 * B7', {
+  'B2' : Winter.select('B2'),
+  'B3' : Winter.select('B3'),
+  'B4' : Winter.select('B4'),
+  'B5' : Winter.select('B5'),
+  'B6' : Winter.select('B6'),
+  'B7' : Winter.select('B7')
+}).rename('TCBWinter').float();
+
+var TCGWinterL = Winter.expression('-0.2941 * B2 - 0.243 * B3 - 0.5424 * B4 + 0.7276 * B5 + 0.0713 * B6 - 0.1608 * B7', {
+  'B2' : Winter.select('B2'),
+  'B3' : Winter.select('B3'),
+  'B4' : Winter.select('B4'),
+  'B5' : Winter.select('B5'),
+  'B6' : Winter.select('B6'),
+  'B7' : Winter.select('B7')
+}).rename('TCGWinter').float();
+
+var TCWWinterL = Winter.expression('.1511 * B2 + .1973 * B3 + .3283 * B4 + .3407  * B5 -.7117 * B6 -.4559 * B7', {
+  'B2' : Winter.select('B2'),
+  'B3' : Winter.select('B3'),
+  'B4' : Winter.select('B4'),
+  'B5' : Winter.select('B5'),
+  'B6' : Winter.select('B6'),
+  'B7' : Winter.select('B7')
+}).rename('TCWWinter').float();
+
+var NDVIWinterL = Winter.expression('(B5-B4)/(B5+B4)', {
+  'B4' : Winter.select('B4'),
+  'B5' : Winter.select('B5')
+}).rename('NDVIWinter').float();
+
+var NDWIWinterL = Winter.expression('(B5-B6)/(B5+B6)', {
+  'B5' : Winter.select('B5'),
+  'B6' : Winter.select('B6')
+}).rename('NDWIWinter').float();
+
+var sam1 = Spring.spectralDistance(Summer, 'sam').abs().rename('sam1')
+var sam2 = Spring.spectralDistance(Fall, 'sam').abs().rename('sam2')
+var sam3 = Summer.spectralDistance(Fall, 'sam').abs().rename('sam3')
+var sam4 = Summer.spectralDistance(Winter, 'sam').abs().rename('sam4')
+
+
+//Sentinel
+var SpringS = sent_spring.select(['B2','B3','B4','B5', 'B6', 'B7', 'B8','B8A','B11','B12'],['B2','B3','B4','B5', 'B6', 'B7', 'B8','B8A','B11','B12'])
+
+var TCBSpringS = SpringS.expression('0.3510 * B2 + 0.3813 * B3 + .34373 * B4 + 0.7196 * B8 + 0.2396 * B11 + 0.1949 * B12', {
+  'B2' : SpringS.select('B2'),
+  'B3' : SpringS.select('B3'),
+  'B4' : SpringS.select('B4'),
+  'B8' : SpringS.select('B8'),
+  'B11' : SpringS.select('B11'),
+  'B12' : SpringS.select('B12')
+}).rename('TCBSpringS').float();
+
+var TCGSpringS = SpringS.expression('-0.3599 * B2 - 0.3533 * B3 - 0.4734 * B4 + 0.6633 * B8 + 0.0087 * B11 - 0.2856 * B12', {
+  'B2' : SpringS.select('B2'),
+  'B3' : SpringS.select('B3'),
+  'B4' : SpringS.select('B4'),
+  'B8' : SpringS.select('B8'),
+  'B11' : SpringS.select('B11'),
+  'B12' : SpringS.select('B12')
+}).rename('TCGSpringS').float();
+
+var TCWSpringS = SpringS.expression('0.2578 * B2 + 0.2305 * B3 + 0.0883 * B4 + 0.1071  * B8 -.7611 * B11 -.5309 * B12', {
+  'B2' : SpringS.select('B2'),
+  'B3' : SpringS.select('B3'),
+  'B4' : SpringS.select('B4'),
+  'B8' : SpringS.select('B8'),
+  'B11' : SpringS.select('B11'),
+  'B12' : SpringS.select('B12')
+}).rename('TCWSpringS').float();
+
+var NDVISpringS = SpringS.expression('(B8-B4)/(B8+B4)', {
+  'B4' : SpringS.select('B4'),
+  'B8' : SpringS.select('B8')
+}).rename('NDVISpringS').float();
+
+var NDWISpringS = SpringS.expression('(B8-B11)/(B8+B11)', {
+  'B8' : SpringS.select('B8'),
+  'B11' : SpringS.select('B11')
+}).rename('NDWISpringS').float();
+
+var SummerS = sent_sum.select(['B2','B3','B4','B5', 'B6', 'B7', 'B8','B8A','B11','B12'],['B2','B3','B4','B5', 'B6', 'B7', 'B8','B8A','B11','B12'])
+
+var TCBSummerS= SummerS.expression('0.3510 * B2 + 0.3813 * B3 + .34373 * B4 + 0.7196 * B8 + 0.2396 * B11 + 0.1949 * B12', {
+  'B2' : SummerS.select('B2'),
+  'B3' : SummerS.select('B3'),
+  'B4' : SummerS.select('B4'),
+  'B8' : SummerS.select('B8'),
+  'B11' : SummerS.select('B11'),
+  'B12' : SummerS.select('B12')
+}).rename('TCBSummerS').float();
+
+var TCGSummerS = SummerS.expression('-0.3599 * B2 - 0.3533 * B3 - 0.4734 * B4 + 0.6633 * B8 + 0.0087 * B11 - 0.2856 * B12', {
+  'B2' : SummerS.select('B2'),
+  'B3' : SummerS.select('B3'),
+  'B4' : SummerS.select('B4'),
+  'B8' : SummerS.select('B8'),
+  'B11' : SummerS.select('B11'),
+  'B12' : SummerS.select('B12')
+}).rename('TCGSummerS').float();
+
+var TCWSummerS = SummerS.expression('0.2578 * B2 + 0.2305 * B3 + 0.0883 * B4 + 0.1071  * B8 -.7611 * B11 -.5309 * B12', {
+  'B2' : SummerS.select('B2'),
+  'B3' : SummerS.select('B3'),
+  'B4' : SummerS.select('B4'),
+  'B8' : SummerS.select('B8'),
+  'B11' : SummerS.select('B11'),
+  'B12' : SummerS.select('B12')
+}).rename('TCWSummerS').float();
+
+var NDVISummerS = SummerS.expression('(B8-B4)/(B8+B4)', {
+  'B4' : SummerS.select('B4'),
+  'B8' : SummerS.select('B8')
+}).rename('NDVISummerS').float();
+
+var NDWISummerS = SummerS.expression('(B8-B11)/(B8+B11)', {
+  'B8' : SummerS.select('B8'),
+  'B11' : SummerS.select('B11')
+}).rename('NDWISummerS').float();
+
+var FallS = sent_fall.select(['B2','B3','B4','B5', 'B6', 'B7', 'B8','B8A','B11','B12'],['B2','B3','B4','B5', 'B6', 'B7', 'B8','B8A','B11','B12'])
+
+var TCBFallS = FallS.expression('0.3510 * B2 + 0.3813 * B3 + .34373 * B4 + 0.7196 * B8 + 0.2396 * B11 + 0.1949 * B12', {
+  'B2' : FallS.select('B2'),
+  'B3' : FallS.select('B3'),
+  'B4' : FallS.select('B4'),
+  'B8' : FallS.select('B8'),
+  'B11' : FallS.select('B11'),
+  'B12' : FallS.select('B12')
+}).rename('TCBFallS').float();
+
+var TCGFallS = FallS.expression('-0.3599 * B2 - 0.3533 * B3 - 0.4734 * B4 + 0.6633 * B8 + 0.0087 * B11 - 0.2856 * B12', {
+  'B2' : FallS.select('B2'),
+  'B3' : FallS.select('B3'),
+  'B4' : FallS.select('B4'),
+  'B8' : FallS.select('B8'),
+  'B11' : FallS.select('B11'),
+  'B12' : FallS.select('B12')
+}).rename('TCGFallS').float();
+
+var TCWFallS = FallS.expression('0.2578 * B2 + 0.2305 * B3 + 0.0883 * B4 + 0.1071  * B8 -.7611 * B11 -.5309 * B12', {
+  'B2' : FallS.select('B2'),
+  'B3' : FallS.select('B3'),
+  'B4' : FallS.select('B4'),
+  'B8' : FallS.select('B8'),
+  'B11' : FallS.select('B11'),
+  'B12' : FallS.select('B12')
+}).rename('TCWFallS').float();
+
+var NDVIFallS = FallS.expression('(B8-B4)/(B8+B4)', {
+  'B4' : FallS.select('B4'),
+  'B8' : FallS.select('B8')
+}).rename('NDVIFallS').float();
+
+var NDWIFallS = FallS.expression('(B8-B11)/(B8+B11)', {
+  'B8' : FallS.select('B8'),
+  'B11' : FallS.select('B11')
+}).rename('NDWIFallS').float();
+
+var WinterS = sent_winter.select(['B2','B3','B4','B5', 'B6', 'B7', 'B8','B8A','B11','B12'],['B2','B3','B4','B5', 'B6', 'B7', 'B8','B8A','B11','B12'])
+
+var TCBWinterS = WinterS.expression('0.3510 * B2 + 0.3813 * B3 + .34373 * B4 + 0.7196 * B8 + 0.2396 * B11 + 0.1949 * B12', {
+  'B2' : WinterS.select('B2'),
+  'B3' : WinterS.select('B3'),
+  'B4' : WinterS.select('B4'),
+  'B8' : WinterS.select('B8'),
+  'B11' : WinterS.select('B11'),
+  'B12' : WinterS.select('B12')
+}).rename('TCBWinterS').float();
+
+var TCGWinterS = WinterS.expression('-0.3599 * B2 - 0.3533 * B3 - 0.4734 * B4 + 0.6633 * B8 + 0.0087 * B11 - 0.2856 * B12', {
+  'B2' : WinterS.select('B2'),
+  'B3' : WinterS.select('B3'),
+  'B4' : WinterS.select('B4'),
+  'B8' : WinterS.select('B8'),
+  'B11' : WinterS.select('B11'),
+  'B12' : WinterS.select('B12')
+}).rename('TCGWinterS').float();
+
+var TCWWinterS = WinterS.expression('0.2578 * B2 + 0.2305 * B3 + 0.0883 * B4 + 0.1071  * B8 -.7611 * B11 -.5309 * B12', {
+  'B2' : WinterS.select('B2'),
+  'B3' : WinterS.select('B3'),
+  'B4' : WinterS.select('B4'),
+  'B8' : WinterS.select('B8'),
+  'B11' : WinterS.select('B11'),
+  'B12' : WinterS.select('B12')
+}).rename('TCWWinterS').float();
+
+var NDVIWinterS = WinterS.expression('(B8-B4)/(B8+B4)', {
+  'B4' : WinterS.select('B4'),
+  'B8' : WinterS.select('B8')
+}).rename('NDVIWinterS').float();
+
+var NDWIWinterS = WinterS.expression('(B8-B11)/(B8+B11)', {
+  'B8' : WinterS.select('B8'),
+  'B11' : WinterS.select('B11')
+}).rename('NDWIWinterS').float();
+
+var sam1S = SpringS.spectralDistance(SummerS, 'sam').abs().rename('sam1S')
+var sam2S = SpringS.spectralDistance(FallS, 'sam').abs().rename('sam2S')
+var sam3S = SummerS.spectralDistance(FallS, 'sam').abs().rename('sam3S')
+var sam4S = SummerS.spectralDistance(WinterS, 'sam').abs().rename('sam4')
+
+// var spectral = Spring
+// .addBands(TCBSpringL)
+// .addBands(TCWSpringL)
+// .addBands(TCGSpringL)
+// .addBands(NDVISpringL)
+// .addBands(NDWISpringL)
+// .addBands(Summer)
+// .addBands(TCBSummerL)
+// .addBands(TCWSummerL)
+// .addBands(TCGSummerL)
+// .addBands(NDVISummerL)
+// .addBands(NDWISummerL)
+// .addBands(Fall)
+// .addBands(TCBFallL)
+// .addBands(TCWFallL)
+// .addBands(TCGFallL)
+// .addBands(NDVIFallL)
+// .addBands(NDWIFallL)
+// .addBands(Winter)
+// .addBands(TCBWinterL)
+// .addBands(TCWWinterL)
+// .addBands(TCGWinterL)
+// .addBands(NDVIWinterL)
+// .addBands(NDWIWinterL)
+// .addBands(sam1)
+// .addBands(sam2)
+// .addBands(sam3)
+// .addBands(sam4)
+
+// Sentinel
+var spectral = SpringS
+.addBands(TCBSpringS)
+.addBands(TCWSpringS)
+.addBands(TCGSpringS)
+.addBands(NDVISpringS)
+.addBands(NDWISpringS)
+.addBands(SummerS)
+.addBands(TCBSummerS)
+.addBands(TCWSummerS)
+.addBands(TCGSummerS)
+.addBands(NDVISummerS)
+.addBands(NDWISummerS)
+.addBands(FallS)
+.addBands(TCBFallS)
+.addBands(TCWFallS)
+.addBands(TCGFallS)
+.addBands(NDVIFallS)
+.addBands(NDWIFallS)
+.addBands(WinterS)
+.addBands(TCBWinterS)
+.addBands(TCWWinterS)
+.addBands(TCGWinterS)
+.addBands(NDVIWinterS)
+.addBands(NDWIWinterS)
+.addBands(sam1S)
+.addBands(sam2S)
+.addBands(sam3S)
+.addBands(sam4S)
+
+
+
+
+//var RF_training= spectral.reduceRegions(table2, ee.Reducer.mean(), 20);
+
+// Clip the spectral image to the defined geometry boundary
+var clippedSpectral = spectral.clip(geometry).toFloat();
+Map.addLayer(clippedSpectral, {}, 'Clipped Spectral');
+
+Export.image.toDrive({
+  image: clippedSpectral,
+  description: 'FloodPlain_Sentinel',  // Task name in Tasks tab
+  folder: '250130_FloodPlain',                  // Your Google Drive folder name
+  fileNamePrefix: 'FloodPlain_Sentinel',      // Output file name
+  region: geometry,                       // Export region (must be a geometry)
+  scale: 20,                              // Pixel resolution in meters
+  maxPixels: 1e13                         // Max number of pixels (adjust if needed)
+});
+
+// //extract all the pixels for each plot
+//var RF_training = spectral.sampleRegions({
+//   collection: table2,                      // Training polygons
+//   properties: ['COVER_TP'],                // Class property name
+//   scale: 20                               // Sampling scale
+//});
+
+// Sample the clipped image within training points
+var RF_training = clippedSpectral.sampleRegions({
+  collection: table2,                  // Training points (e.g., sample polygons or points)
+  properties: ['COVER_TP'],            // Class property name
+  scale: 200                            // Sampling scale
+});
+
+
+print(RF_training, "Data Trained");
+
+//var trainingNoNulls = RF_training.filter(ee.Filter.notNull(RF_training.first().propertyNames()))
+//print(trainingNoNulls, "NoNulls training")
+//Export.table.toDrive(trainingNoNulls)
+
+// ///////////////Lets classify!
+
+// //Run the rRandomForest
+//var classifier= ee.Classifier.smileRandomForest(500).train(trainingNoNulls, "spcd", spectral.bandNames());
+var classifier= ee.Classifier.smileRandomForest(500).train(RF_training, "COVER_TP", spectral.bandNames())
+
+// //Apply the randomForest
+var result= spectral.classify(classifier)
+
+// Map.centerObject(table);
+var igbpPalette = [ 
+    'B0F3F0',  // 1 Black Ash
+ 'EEF907', //12 aspen
+  'EEF907', //12 aspen
+      '1C8320', // 20 Northern
+  'EC9117', // 30 oak
+'FBFAF7',  // 51 White Pine
+'F1101E', // 52 Red Pine
+  'DA35AD', // 53 Jack Pine
+  'bfbeb4',  // 63 White Spruce/Balsam Fir
+  '0d0d0d', // 71 Black Spruce
+    'e8b7ee', // 72 Tamarack
+  '8337a5', // 73 Cedar
+  '0000FF',//96 water
+  'ddce9e', // 99 Non-Forested
+//yellow rush, blue water, gray - water lilly, red - wild rice,
+];
+
+Map.addLayer(result,{min: 1, max: 99, palette: igbpPalette})
+// Force projection of 500 meters/pixel, which is the native MODIS resolution.
+//var SCALE = 10;
+//var result2= spectral.classify(classifier)
+// Load a 2001 MODIS land cover image and
+// select the classification band of interest.
+
+
+// Smooth with a mode filter.
+// and force operations to be done at native scale
+//var mode = result.focal_mode().reproject('EPSG:26915', null, SCALE)//.mask(treemask);
+//var smooth = mode.focal_mode().reproject('EPSG:26915', null, SCALE)//.mask(treemask);
+//var mode2 = result2.focal_mode().reproject('EPSG:26915', null, SCALE)//.mask(treemask);
+//var smooth2 = mode2.focal_mode().reproject('EPSG:26915', null, SCALE)//.mask(treemask);
+
+//Map.addLayer(smooth,{min: 1, max: 100, palette: igbpPalette})
+//Map.addLayer(smooth2,{min: 1, max: 10, palette: igbpPalette})
+//Export.image.toCloudStorage(smooth)
